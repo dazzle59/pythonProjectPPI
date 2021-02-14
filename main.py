@@ -1,8 +1,9 @@
 import main_window
+import sys
+import sqlitedb
 
 
 if __name__ == "__main__":
-    import sys
     app = main_window.QtWidgets.QApplication(sys.argv)
     MainWindow = main_window.QtWidgets.QMainWindow()
     ui = main_window.Ui_MainWindow()
