@@ -2,6 +2,7 @@ from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import QTableWidgetItem
 
 import sqlitedb
+import html_wrap
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
@@ -47,12 +48,12 @@ class Ui_MainWindow(object):
         self.pushButton_6 = QtWidgets.QPushButton(self.tab_1)
         self.pushButton_6.setGeometry(QtCore.QRect(20, 210, 93, 28))
         self.pushButton_6.setObjectName("pushButton_3")
-        self.pushButton_4 = QtWidgets.QPushButton(self.tab_1)
-        self.pushButton_4.setGeometry(QtCore.QRect(120, 210, 93, 28))
-        self.pushButton_4.setObjectName("pushButton_4")
-        self.pushButton_5 = QtWidgets.QPushButton(self.tab_1)
-        self.pushButton_5.setGeometry(QtCore.QRect(220, 210, 93, 28))
-        self.pushButton_5.setObjectName("pushButton_5")
+        self.btn_report_1 = QtWidgets.QPushButton(self.tab_1)
+        self.btn_report_1.setGeometry(QtCore.QRect(120, 210, 93, 28))
+        self.btn_report_1.setObjectName("btn_report_1")
+        self.btn_report_2 = QtWidgets.QPushButton(self.tab_1)
+        self.btn_report_2.setGeometry(QtCore.QRect(220, 210, 93, 28))
+        self.btn_report_2.setObjectName("btn_report_2")
         self.label_5 = QtWidgets.QLabel(self.tab_1)
         self.label_5.setGeometry(QtCore.QRect(10, 10, 101, 20))
         self.label_5.setObjectName("label_5")
@@ -67,12 +68,12 @@ class Ui_MainWindow(object):
     ### tab_2 ###
         self.tab_2 = QtWidgets.QWidget()
         self.tab_2.setObjectName("tab_2")
-        self.pushButton = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton.setGeometry(QtCore.QRect(410, 300, 93, 28))
-        self.pushButton.setObjectName("pushButton")
-        self.pushButton_2 = QtWidgets.QPushButton(self.tab_2)
-        self.pushButton_2.setGeometry(QtCore.QRect(310, 300, 93, 28))
-        self.pushButton_2.setObjectName("pushButton_2")
+        self.btn_add_t2 = QtWidgets.QPushButton(self.tab_2)
+        self.btn_add_t2.setGeometry(QtCore.QRect(410, 300, 93, 28))
+        self.btn_add_t2.setObjectName("btn_add_t2")
+        self.btn_refresh_t2 = QtWidgets.QPushButton(self.tab_2)
+        self.btn_refresh_t2.setGeometry(QtCore.QRect(310, 300, 93, 28))
+        self.btn_refresh_t2.setObjectName("btn_refresh_t2")
         self.pushButton_3 = QtWidgets.QPushButton(self.tab_2)
         self.pushButton_3.setGeometry(QtCore.QRect(210, 300, 93, 28))
         self.pushButton_3.setObjectName("pushButton_3")
@@ -108,12 +109,14 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-        self.pushButton.clicked.connect(self.on_click_1)
-        self.pushButton_2.clicked.connect(self.table_show)
+        self.btn_add_t2.clicked.connect(self.on_click_1)
+        self.btn_refresh_t2.clicked.connect(self.table_show)
         self.tableWidget.cellClicked.connect(self.on_click_2)
         self.pushButton_3.clicked.connect(self.delete_user)
         self.comboBox.currentIndexChanged.connect(self.draw_cmb_Good)
-
+        self.pushButton_6.clicked.connect(self.on_click_add_rec)
+        self.btn_report_1.clicked.connect(self.report_1)
+        self.btn_report_2.clicked.connect(self.report_2)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -123,12 +126,12 @@ class Ui_MainWindow(object):
         self.label_4.setText(_translate("MainWindow", "Сумма"))
         self.label_comment.setText(_translate("MainWindow", "Комментарий"))
         self.pushButton_6.setText(_translate("MainWindow", "Добавить"))
-        self.pushButton_4.setText(_translate("MainWindow", "Отчет_1"))
-        self.pushButton_5.setText(_translate("MainWindow", "Отчет_2"))
+        self.btn_report_1.setText(_translate("MainWindow", "Отчет_1"))
+        self.btn_report_2.setText(_translate("MainWindow", "Отчет_2"))
         self.label_5.setText(_translate("MainWindow", "Пользователь"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_1), _translate("MainWindow", "Бюджет"))
-        self.pushButton.setText(_translate("MainWindow", "Добавить"))
-        self.pushButton_2.setText(_translate("MainWindow", "Обновить"))
+        self.btn_add_t2.setText(_translate("MainWindow", "Добавить"))
+        self.btn_refresh_t2.setText(_translate("MainWindow", "Обновить"))
         self.pushButton_3.setText(_translate("MainWindow", "Удалить"))
         self.radioButton.setText(_translate("MainWindow", "муж"))
         self.radioButton_2.setText(_translate("MainWindow", "жен"))
@@ -193,3 +196,23 @@ class Ui_MainWindow(object):
         self.comboBox_2.clear()
         for i in res:
             self.comboBox_2.addItem(i[2], i[0])
+
+    def on_click_add_rec(self):
+        good_id = self.comboBox_2.currentData()
+        user_id = self.comboBox_3.currentData()
+        summ = self.lineEdit_3.text()
+        comment = self.lineEdit_comment.text()
+        self.sdb.add_record(good_id, user_id, int(summ), comment)
+        print('commit')
+
+    def report_1(self):
+        res = self.sdb.select_report_1()
+        html = html_wrap.html_wrap(res, 'report_1')
+        html_wrap.save(html, 'report_1')
+
+    def report_2(self):
+        res = self.sdb.select_report_2()
+        res2 = self.sdb.select_report_3()
+        html = html_wrap.html_wrap(res, 'report_2')
+        html += html_wrap.html_wrap(res2, 'report_3')
+        html_wrap.save(html, 'report_2_3')

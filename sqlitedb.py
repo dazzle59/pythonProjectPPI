@@ -51,7 +51,9 @@ class Sqlite_DB:
 
     def add_user(self, user):
         print(user)
-        self.cur.execute("INSERT INTO Users(full_name, age, gender, active_from) VALUES('%s', %d, '%s', CURRENT_TIMESTAMP)" % (user['full_name'], user['age'], user['gender']))
+        self.cur.execute("INSERT INTO Users(full_name, age, gender, active_from) "
+                         "VALUES('%s', %d, '%s', CURRENT_TIMESTAMP)"
+                         % (user['full_name'], user['age'], user['gender']))
         self.conn.commit()
         self.cur.execute("SELECT ID FROM Users WHERE full_name='%s'" % user['full_name'])
         return self.cur.fetchone()
@@ -74,6 +76,34 @@ class Sqlite_DB:
         return self.cur.fetchall()
 
     def add_record(self, good_id, user_id, summ, comment=None):
-        self.cur.execute("INSERT INTO Users(full_name, age, gender, active_from) VALUES('%s', %d, '%s', CURRENT_TIMESTAMP)" % ()
+        self.cur.execute("INSERT INTO Dec_records(Goods_ID, User_ID, summ, com, date_rec) "
+                         "VALUES('%d', %d, '%d', '%s', CURRENT_TIMESTAMP)"
+                         % (good_id, user_id, summ, comment))
+        self.conn.commit()
+
+    def select_report_1(self):
+        self.cur.execute("select u.full_name, c.name, sum(summ) "
+                         "from Dec_records dr, Category c, Goods g, Users u "
+                         "where dr.date_rec > '2021-02-16 00:00:00' "
+                         "and dr.Goods_ID=g.ID "
+                         "and g.Category_ID=c.ID "
+                         "and u.ID=dr.User_ID "
+                         "group by u.full_name, c.name")
+        return self.cur.fetchall()
+
+    def select_report_2(self):
+        self.cur.execute("select c.name, sum(dr.summ) "
+                         "from Dec_records dr, Category c, Goods g "
+                         "where dr.Goods_ID=g.ID "
+                         "and g.Category_ID=c.ID "
+                         "group by c.name;")
+        return self.cur.fetchall()
+
+    def select_report_3(self):
+        self.cur.execute("select g.name, max(dr.summ) "
+                         "from Dec_records dr, Category c, Goods g "
+                         "where dr.Goods_ID=g.ID and g.Category_ID=c.ID "
+                         "group by c.name;")
+        return self.cur.fetchall()
 
 
